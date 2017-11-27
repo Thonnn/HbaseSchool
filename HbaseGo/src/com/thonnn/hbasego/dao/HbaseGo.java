@@ -12,10 +12,10 @@ import java.util.*;
 /**
  * HbaseGo 类为 HbaseGoToTableDAO 类的依赖类，本类为默认 Default 包访问权限；
  * 本类只能静态访问，所有内容都为保护成员和私有成员，此类不向外开放；
- *
  * @author Thonnn 2017-11-26
  */
 class HbaseGo {
+
     protected static HashMap<String, HbaseGoTable> tableBeanHashMap = null;                     // 一个存储了 Hbase 表与 bean映射关系的 HashMap
     protected static String ip = null;                                                          // Hbase 的 IP
     protected static String port = "2181";                                                      // Hbase 的端口
@@ -24,9 +24,9 @@ class HbaseGo {
     protected static int hbaseConnectionOutTime = 300;                                          // 连接最大停滞时间，当因未知的错误导致连接未能正常返还时，其在 busyConnectionsList 中的最大停滞时间，超过这个时间则会自动返还 spareConnectionsQueue
 
     private static Configuration conf = HBaseConfiguration.create();                            // Hbase 连接配置
-    private static Queue<Connection> spareConnectionsQueue = new LinkedList<Connection>();      // 空闲的连接队列
-    private static List<Connection> busyConnectionsList = new ArrayList<Connection>();          // 繁忙中的连接列表
-    private static List<MyInt> busyConnectionsTimes = new ArrayList<MyInt>();                   // 繁忙中的连接的停滞时间列表，其类型参数，MyInt 类为构造的一个用于引用型传递的类
+    private static Queue<Connection> spareConnectionsQueue = new LinkedList<>();      // 空闲的连接队列
+    private static List<Connection> busyConnectionsList = new ArrayList<>();          // 繁忙中的连接列表
+    private static List<MyInt> busyConnectionsTimes = new ArrayList<>();                   // 繁忙中的连接的停滞时间列表，其类型参数，MyInt 类为构造的一个用于引用型传递的类
 
     private HbaseGo(){}
 
@@ -100,26 +100,24 @@ class HbaseGo {
             spareConnectionsQueue.offer(getHbaseConnection());
         }
 
-        new Thread(new Runnable() {                                                 // Hbase Connection 自管理连接线程
-            @Override
-            public void run() {
-                while (true){
-                    try {                                                           // 本 try 的目的是为了保证线程不会因未知错误中断
-                        int length = busyConnectionsTimes.size();
-                        for(int i = 0; i < length; i++){
-                            if(busyConnectionsTimes.get(i).value >= hbaseConnectionOutTime){
-                                flybackConnection(busyConnectionsList.get(i));      // 停滞时间达到上限自回收
-                                i--;                                                // 必须使 i - 1
-                                length--;                                           // 必须使 length - 1
-                                System.out.println("====> Auto recycle a out-time Hbase connection.");
-                            }else {
-                                busyConnectionsTimes.get(i).value++;                // 停滞时间未达到上限，使其停滞时间增加
-                            }
+        // Hbase Connection 自管理连接线程
+        new Thread(() -> {
+            while (true){
+                try {                                                           // 本 try 的目的是为了保证线程不会因未知错误中断
+                    int length = busyConnectionsTimes.size();
+                    for(int i = 0; i < length; i++){
+                        if(busyConnectionsTimes.get(i).value >= hbaseConnectionOutTime){
+                            flybackConnection(busyConnectionsList.get(i));      // 停滞时间达到上限自回收
+                            i--;                                                // 必须使 i - 1
+                            length--;                                           // 必须使 length - 1
+                            System.out.println("====> Auto recycle a out-time Hbase connection.");
+                        }else {
+                            busyConnectionsTimes.get(i).value++;                // 停滞时间未达到上限，使其停滞时间增加
                         }
-                        Thread.sleep(1000);                                   // 线程休眠
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
+                    Thread.sleep(1000);                                   // 线程休眠
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }).start();
@@ -135,7 +133,7 @@ class HbaseGo {
  * @author Thonnn 2017-11-26
  */
 class HbaseGoTable{
-    protected String tableNmae = null;                                  // 表名称
+    protected String tableNmae;                                  // 表名称
     protected String rowkey = "RowKey";                                 // RowKey 映射及其默认值
     protected HashMap<String, String> familyMap = new HashMap<>();      // 列簇与 bean 中的字段映射存储
     HbaseGoTable(String tableNmae){                                        // 默认构造，需要用表名创建
