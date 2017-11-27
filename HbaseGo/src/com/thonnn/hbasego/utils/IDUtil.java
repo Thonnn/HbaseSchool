@@ -6,9 +6,8 @@ import java.util.Date;
 import java.util.Random;
 
 /**
- * IDUtil 工具类用于获得各种ID
+ * IDUtil 工具类用于获得一个ID，或者根据本类中定义的标准ID格式，将ID转化成时间戳
  * @author Thonnn
- *
  */
 public class IDUtil {
 	private static SimpleDateFormat sdf = new SimpleDateFormat ("yyyyMMddHHmmssSSS");
