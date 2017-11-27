@@ -24,7 +24,6 @@ public class IDUtil {
 		Date date = sdf.parse(str);
 		return date.getTime();
 	}
-
 	/**
 	 * 获取一个长 21 位的 ID 服从格式 yyyyMMddHHmmssSSS + 4 位随机数
 	 * @return 一个长度为 21 位的 ID
