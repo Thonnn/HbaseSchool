@@ -206,7 +206,7 @@ public class HbaseGoToTableDAO implements IHbaseGoAdd, IHbaseGoSearch, IHbaseGoA
                 ResultScanner rscan = table.getScanner(scan);
                 int count = 0;
                 for(Result r : rscan){
-                    if(page_size == 0 || count > page_size * page_index){
+                    if(page_size == 0 || count >= page_size * page_index){
                         IHbaseGoBean currentBean = bean.cloneThis();
                         rowKeyField.set(currentBean, bytesUtil.toObject(r.getRow()));
                         for (String familyKey : familyKeySet){
@@ -221,6 +221,12 @@ public class HbaseGoToTableDAO implements IHbaseGoAdd, IHbaseGoSearch, IHbaseGoA
                             }
                             for(byte[] cellKey : cellKeySet){
                                 beanMap.put(bytesUtil.toObject(cellKey), bytesUtil.toObject(familyMap.get(cellKey)));
+                            }
+                            if(page_size != 0){
+                                count++;
+                                if(count >= page_size * page_index + page_size){
+                                    break;
+                                }
                             }
                         }
                         rsl.add(currentBean);
