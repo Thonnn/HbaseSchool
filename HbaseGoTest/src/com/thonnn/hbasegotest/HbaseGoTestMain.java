@@ -4,6 +4,7 @@ import com.thonnn.hbasego.dao.HbaseGoBuilder;
 import com.thonnn.hbasego.dao.HbaseGoToTableDAO;
 import com.thonnn.hbasego.interfaces.IHbaseGoBean;
 import com.thonnn.hbasego.utils.IDUtil;
+import com.thonnn.hbasegotest.beans.Test1Bean;
 import com.thonnn.hbasegotest.beans.Test2Bean;
 import com.thonnn.hbasegotest.beans.TestBean;
 
@@ -19,10 +20,10 @@ import java.util.jar.JarFile;
 
 public class HbaseGoTestMain {
     public static void main(String[] args) throws Exception {
-        String packageName = "com.thonnn.hbasegotest.mappers";
+        /*String packageName = "com.thonnn.hbasegotest.mappers";
         HbaseGoBuilder hbaseGoBuilder = HbaseGoBuilder.getInstance(new HbaseGoTestMain().getClass()).addScanPackage(packageName).setIP("master1");
         hbaseGoBuilder.build();
-        TestBean tb = new TestBean();
+        TestBean tb = new TestBean();*/
         //-----------ADD---------------------------------------------------------
         /*tb.addToF1("tb11", "tb11");
         tb.addToF1("tb12", "tb12");
@@ -57,15 +58,15 @@ public class HbaseGoTestMain {
         list.add(t2b);
         list.add(t2b2);
         */
-        tb.addToF1("tb12", "tb12");
+        /*tb.addToF1("tb12", "tb12");
         tb.setF2(null);
-        List<IHbaseGoBean> list = new HbaseGoToTableDAO().search(tb);
+        List<Test2Bean> list = new HbaseGoToTableDAO().search(tb);
         System.out.println(list.size());
         for(IHbaseGoBean tbb : list){
             TestBean tt = (TestBean) tbb;
             System.out.println(tt.getF1());
             System.out.println(tt.getF2());
-        }
+        }*/
 
         //-----------Search---------------------------------------------------------
         //tb.setRowKey("201711252307201815867");
@@ -88,5 +89,34 @@ public class HbaseGoTestMain {
         //----------delete----------------------------------------------------------------
         //tb.setRowKey("222");
         //System.out.println(new HbaseGoToTableDAO(true, true).delete(tb));
+
+
+        String packageName = "com.thonnn.hbasegotest.mappers";
+        HbaseGoBuilder hbaseGoBuilder = HbaseGoBuilder.getInstance(new HbaseGoTestMain().getClass()).addScanPackage(packageName).setIP("master1");
+        hbaseGoBuilder.build();
+        Test1Bean tb = new Test1Bean();
+        tb.addToName(null,"王琮");
+        tb.addToSex(null, "男");
+        tb.addToOther(null, "这是一个备注");
+        tb.addToOther("fuck", "fuckkk");
+
+        HbaseGoToTableDAO dao = new HbaseGoToTableDAO();
+        dao.add(tb);
+        System.out.println("Add is over...");
+
+        Test1Bean tb2 = new Test1Bean();
+        tb2.addToName(null,"王琮");
+
+        List<Test1Bean> list = dao.search(tb2, 0,0);
+        for (Test1Bean b : list) {
+            System.out.println(b.getRowKey());
+            System.out.println(b.getFromName(null));
+            System.out.println(b.getFromSex(null));
+            System.out.println(b.getFromOther(null));
+            System.out.println(b.getFromOther("fuck"));
+        }
+
+        System.out.println("Search is over...");
+        System.exit(0);
     }
 }

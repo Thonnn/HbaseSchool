@@ -7,6 +7,6 @@ import java.util.List;
  * @author Thonnn 2017-11-26
  */
 public interface IHbaseGoSearch {
-    List<IHbaseGoBean> search(IHbaseGoBean bean);
+    <T> List<T> search(IHbaseGoBean bean);
     Long searchCount(IHbaseGoBean bean);
 }

@@ -10,4 +10,10 @@
         <family name="f21" field="f21" />
         <family name="f22" field="f22" />
     </table>
+    <table name="test1" bean="com.thonnn.hbasegotest.beans.Test1Bean">
+        <rowkey field="RowKey" />
+        <family name="name" field="name" />
+        <family name="other" field="other" />
+        <family name="sex" field="sex" />
+    </table>
 </HbaseGo>

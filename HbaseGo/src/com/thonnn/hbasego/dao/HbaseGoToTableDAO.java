@@ -149,8 +149,8 @@ public class HbaseGoToTableDAO implements IHbaseGoAdd, IHbaseGoSearch, IHbaseGoA
      * @param page_index 分页当前页
      * @return 一个存储了搜索结果的 List，正常来说这个值不会是 null 的，当搜索不到数据时一般会返回一个大小为 0 的 List
      */
-    public List<IHbaseGoBean> search(IHbaseGoBean bean, int page_size, int page_index) {
-        List<IHbaseGoBean> rsl = new ArrayList<>();
+    public <T> List<T> search(IHbaseGoBean bean, int page_size, int page_index) {
+        List<T> rsl = new ArrayList<>();
         try{
             if(page_size < 0){
                 throw new HbaseGoSearchException("Page_Size mast more than 0.");
@@ -197,7 +197,7 @@ public class HbaseGoToTableDAO implements IHbaseGoAdd, IHbaseGoSearch, IHbaseGoA
                     }
                     familyField.set(currentBean, beanMap);
                 }
-                rsl.add(currentBean);
+                rsl.add((T) currentBean);
             }else {
                 List<Filter> filters = new ArrayList<>();                           // rowkey 为空则使用过滤器的方式查询
                 assembleFilter(bean, hbaseGoTable, familyKeySet, filters);          // 组装 Filter
@@ -229,7 +229,7 @@ public class HbaseGoToTableDAO implements IHbaseGoAdd, IHbaseGoSearch, IHbaseGoA
                                 }
                             }
                         }
-                        rsl.add(currentBean);
+                        rsl.add((T) currentBean);
                     }else {
                         count++;
                     }
@@ -251,7 +251,7 @@ public class HbaseGoToTableDAO implements IHbaseGoAdd, IHbaseGoSearch, IHbaseGoA
      * @return 一个存储了搜索结果的 List，正常来说这个值不会是 null 的，当搜索不到数据时一般会返回一个大小为 0 的 List
      */
     @Override
-    public List<IHbaseGoBean> search(IHbaseGoBean bean){
+    public <T> List<T> search(IHbaseGoBean bean){
         return search(bean, 0, 0);
     }
 
