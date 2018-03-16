@@ -95,7 +95,7 @@ public class HbaseGoTestMain {
         HbaseGoBuilder hbaseGoBuilder = HbaseGoBuilder.getInstance(new HbaseGoTestMain().getClass()).addScanPackage(packageName).setIP("master1");
         hbaseGoBuilder.build();
         Test1Bean tb = new Test1Bean();
-        tb.addToName(null,"王琮");
+        tb.addToName(null,"张三");
         tb.addToSex(null, "男");
         tb.addToOther(null, "这是一个备注");
         tb.addToOther("fuck", "fuckkk");
@@ -105,7 +105,7 @@ public class HbaseGoTestMain {
         System.out.println("Add is over...");
 
         Test1Bean tb2 = new Test1Bean();
-        tb2.addToName(null,"王琮");
+        tb2.addToName(null,"张三");
 
         List<Test1Bean> list = dao.search(tb2, 0,0);
         for (Test1Bean b : list) {
