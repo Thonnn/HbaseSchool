@@ -26,11 +26,11 @@ import java.util.Objects;
  *
  * @author Thonnn 2017-11-26
  */
-public class HbaseGoBuilder {
+public final class HbaseGoBuilder {
     private static HbaseGoBuilder hbaseGoBuilder = null;        // 保证单实例使用
     private ClassLoader loader = null;                          // 当前的 ClassLoader 用于反射，以及 xml 解析
-    private List<String> xmls = new ArrayList<String>();             // 临时的存储了配置的xml
-    private boolean builded = false;                           // 是否已经创建过
+    private List<String> xmls = new ArrayList<>();             // 临时的存储了配置的xml
+    private boolean built = false;                           // 是否已经创建过
     private HbaseGoBuilder(){                                    // 保证单实例
 
     }
@@ -60,7 +60,7 @@ public class HbaseGoBuilder {
      * @throws HbaseGoBuilderException  由于是强线程安全的，当工厂已经执行过 build() 方法之后则不再支持更改，如果尝试更改了，则会抛出该异常，同样的， IP 不能为 null
      */
     public synchronized HbaseGoBuilder setIP(String ip) throws HbaseGoBuilderException {
-        if(builded){
+        if(built){
             throw new HbaseGoBuilderException("HbaseGo was built, you cannot change IP again.");
         }
         if(ip == null){
@@ -77,7 +77,7 @@ public class HbaseGoBuilder {
      * @throws HbaseGoBuilderException 当端口在工厂执行了 build() 方案后尝试重置时发生，当端口不符合端口标准时发生
      */
     public synchronized HbaseGoBuilder setPort(int port) throws HbaseGoBuilderException {
-        if(builded){
+        if(built){
             throw new HbaseGoBuilderException("HbaseGo was built, you cannot change Port again.");
         }
         if(port < 1 || port > 65535){
@@ -94,7 +94,7 @@ public class HbaseGoBuilder {
      * @throws HbaseGoBuilderException  当端口在工厂执行了 build() 方案后尝试重置时发生，当数量小于 1 时发生
      */
     public synchronized HbaseGoBuilder setMaxHbaseConnections(int num) throws HbaseGoBuilderException {
-        if(builded){
+        if(built){
             throw new HbaseGoBuilderException("HbaseGo was built, you cannot change MaxHbaseConnections again.");
         }
         if(num < 1){
@@ -111,7 +111,7 @@ public class HbaseGoBuilder {
      * @throws HbaseGoBuilderException 当端口在工厂执行了 build() 方案后尝试重置时发生，当连接数小于 1 或者大于最大连接数时发生
      */
     public synchronized HbaseGoBuilder setInitHbaseConnections(int num) throws HbaseGoBuilderException {
-        if(builded){
+        if(built){
             throw new HbaseGoBuilderException("HbaseGo was built, you cannot change InitHbaseConnections again.");
         }
         if(num < 1){
@@ -131,7 +131,7 @@ public class HbaseGoBuilder {
      * @throws HbaseGoBuilderException  当端口在工厂执行了 build() 方案后尝试重置时发生，配置时间小于 60 时发生
      */
     public synchronized HbaseGoBuilder setHbaseConnectionOutTime(int seconds) throws HbaseGoBuilderException {
-        if(builded){
+        if(built){
             throw new HbaseGoBuilderException("HbaseGo was built, you cannot change HbaseConnectionOutTime again.");
         }
         if(seconds < 60){
@@ -195,12 +195,12 @@ public class HbaseGoBuilder {
      * @throws HbaseGoRebuildException 当尝试重新创建时发生
      */
     public synchronized void build() throws HbaseGoRebuildException{
-        if(!builded){
+        if(!built){
             HashMap<String, HbaseGoTable> tableBeanHashMap = new HashMap<>();
             try {
                 DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
                 DocumentBuilder db = dbf.newDocumentBuilder();
-                Document document = null;
+                Document document;
                 for (String str : xmls) {                                           // 解析多个 xml
                     try{
                         File xmlFile = new File(str);
@@ -282,7 +282,7 @@ public class HbaseGoBuilder {
             } catch (HbaseConnectException e) {
                 e.printStackTrace();
             }
-            builded = true;
+            built = true;
             return;
         }
         throw new HbaseGoRebuildException();
