@@ -98,7 +98,7 @@ public class HbaseGoTestMain {
         tb.addToName(null,"张三");
         tb.addToSex(null, "男");
         tb.addToOther(null, "这是一个备注");
-        tb.addToOther("fuck", "fuckkk");
+        tb.addToOther("i", "iiii");
 
         HbaseGoToTableDAO dao = new HbaseGoToTableDAO();
         dao.add(tb);
