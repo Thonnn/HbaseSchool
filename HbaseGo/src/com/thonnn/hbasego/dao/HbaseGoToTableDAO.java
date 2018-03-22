@@ -144,12 +144,13 @@ public class HbaseGoToTableDAO implements IHbaseGoAdd, IHbaseGoSearch, IHbaseGoA
      * 你可以采取将 bean 中的除了 rowkey 映射的字段以外的其他字段都设置为空(空的，或者是 null)的方法取消这种碰撞机制；
      * 当 rowkey 为空时则按照其他条件查询
      * @param bean 相当于存储了搜索条件的 bean
+     * @param <T> 泛型上界为 IHbaseGoBean，其表示必须是实现了IHbaseGoBean 接口的类！
      * @param page_size 分页大小
      * @param page_index 分页当前页
      * @return 一个存储了搜索结果的 List，正常来说这个值不会是 null 的，当搜索不到数据时一般会返回一个大小为 0 的 List
      */
     @Override
-    public <T> List<T> search(T bean, int page_size, int page_index) {
+    public <T extends IHbaseGoBean> List<T> search(T bean, int page_size, int page_index) {
         List<T> rsl = new ArrayList<>();
         try{
             if(page_size < 0){
@@ -168,7 +169,7 @@ public class HbaseGoToTableDAO implements IHbaseGoAdd, IHbaseGoSearch, IHbaseGoA
             if (RowKey != null){                                                    // 检查 rowkey，不为空则按照 rowkey 查询
                 Get get = new Get(bytesUtil.toBytes(RowKey));
                 Result r = table.get(get);
-                IHbaseGoBean currentBean = ((IHbaseGoBean) bean).cloneThis();        // 自定义的深度克隆方法，克隆一个bean
+                T currentBean = bean.cloneThis();        // 自定义的深度克隆方法，克隆一个bean
                 for (String familyKey : familyKeySet){
                     Field familyField = currentBean.getClass().getDeclaredField(hbaseGoTable.familyMap.get(familyKey));
                     familyField.setAccessible(true);
@@ -197,17 +198,17 @@ public class HbaseGoToTableDAO implements IHbaseGoAdd, IHbaseGoSearch, IHbaseGoA
                     }
                     familyField.set(currentBean, beanMap);
                 }
-                rsl.add((T) currentBean);
+                rsl.add(currentBean);
             }else {
                 List<Filter> filters = new ArrayList<>();                           // rowkey 为空则使用过滤器的方式查询
-                assembleFilter(((IHbaseGoBean) bean), hbaseGoTable, familyKeySet, filters);          // 组装 Filter
+                assembleFilter(bean, hbaseGoTable, familyKeySet, filters);          // 组装 Filter
                 Scan scan = new Scan();
                 scan.setFilter(new FilterList(filters));
                 ResultScanner rscan = table.getScanner(scan);
                 int count = 0;
                 for(Result r : rscan){
                     if(page_size == 0 || count >= page_size * page_index){
-                        IHbaseGoBean currentBean = ((IHbaseGoBean) bean).cloneThis();
+                        T currentBean = bean.cloneThis();
                         rowKeyField.set(currentBean, bytesUtil.toObject(r.getRow()));
                         for (String familyKey : familyKeySet){
                             Field familyField = currentBean.getClass().getDeclaredField(hbaseGoTable.familyMap.get(familyKey));
@@ -229,7 +230,7 @@ public class HbaseGoToTableDAO implements IHbaseGoAdd, IHbaseGoSearch, IHbaseGoA
                                 }
                             }
                         }
-                        rsl.add((T) currentBean);
+                        rsl.add(currentBean);
                     }else {
                         count++;
                     }
