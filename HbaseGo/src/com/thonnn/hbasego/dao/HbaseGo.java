@@ -13,20 +13,22 @@ import java.util.*;
  * HbaseGo 类为 HbaseGoToTableDAO 类的依赖类，本类为默认 Default 包访问权限；
  * 本类只能静态访问，所有内容都为保护成员和私有成员，此类不向外开放；
  * @author Thonnn 2017-11-26
+ * @version 1.1.0
+ * @since 1.0.0
  */
-class HbaseGo {
+final class HbaseGo {
 
-    protected static HashMap<String, HbaseGoTable> tableBeanHashMap = null;                     // 一个存储了 Hbase 表与 bean映射关系的 HashMap
-    protected static String ip = null;                                                          // Hbase 的 IP
-    protected static String port = "2181";                                                      // Hbase 的端口
-    protected static int maxHbaseConnectionsNum = 40;                                           // Hbase 的最大连接数
-    protected static int initHbaseConnectionsNum = 5;                                           // 连接初始化时建立的连接数
-    protected static int hbaseConnectionOutTime = 300;                                          // 连接最大停滞时间，当因未知的错误导致连接未能正常返还时，其在 busyConnectionsList 中的最大停滞时间，超过这个时间则会自动返还 spareConnectionsQueue
-
-    private static Configuration conf = HBaseConfiguration.create();                            // Hbase 连接配置
+    static HashMap<String, HbaseGoTable> tableBeanHashMap = null;                     // 一个存储了 Hbase 表与 bean映射关系的 HashMap
+    static String ip = null;                                                          // Hbase 的 IP
+    static String port = "2181";                                                      // Hbase 的端口
+    static int maxHbaseConnectionsNum = 40;                                           // Hbase 的最大连接数
+    static int initHbaseConnectionsNum = 5;                                           // 连接初始化时建立的连接数
+    static int hbaseConnectionOutTime = 300;                                          // 连接最大停滞时间，当因未知的错误导致连接未能正常返还时，其在 busyConnectionsList 中的最大停滞时间，超过这个时间则会自动返还 spareConnectionsQueue
+    private static boolean stopSelfManagerFlag = false;                             // 自管理线程停止运行信号
+    private static Configuration conf = HBaseConfiguration.create();                  // Hbase 连接配置
     private static Queue<Connection> spareConnectionsQueue = new LinkedList<>();      // 空闲的连接队列
     private static List<Connection> busyConnectionsList = new ArrayList<>();          // 繁忙中的连接列表
-    private static List<MyInt> busyConnectionsTimes = new ArrayList<>();                   // 繁忙中的连接的停滞时间列表，其类型参数，MyInt 类为构造的一个用于引用型传递的类
+    private static List<MyInt> busyConnectionsTimes = new ArrayList<>();              // 繁忙中的连接的停滞时间列表，其类型参数，MyInt 类为构造的一个用于引用型传递的类
 
     private HbaseGo(){}
 
@@ -37,7 +39,7 @@ class HbaseGo {
      *               默认为 true。
      * @return  一个 Hbase 连接实例
      */
-    protected synchronized static Connection getHbaseConnection(boolean safely){
+    synchronized static Connection getHbaseConnection(boolean safely){
         Connection conn = spareConnectionsQueue.poll();
         if(conn == null){
             if(busyConnectionsList.size() >= maxHbaseConnectionsNum){
@@ -63,7 +65,7 @@ class HbaseGo {
      * 返还 Hbase 连接，从繁忙列表中移除，并加入空闲队列，同时消除其对应的停滞时间
      * @param connection 期望返还的连接
      */
-    protected synchronized static void flybackConnection(Connection connection){
+    synchronized static void flybackConnection(Connection connection){
         int index = busyConnectionsList.indexOf(connection);
         busyConnectionsList.remove(connection);
         busyConnectionsTimes.remove(index);         // 消除停滞时间
@@ -87,7 +89,7 @@ class HbaseGo {
      * 连接到 Hbase，相当于初始化连接，方法内部会创建一个自管理线程，防止因不可预知地错误/异常导致 Hbase 连接长时间停滞在繁忙列表中
      * @throws HbaseConnectException 一个属于 HbaseGo 的 Hbase 连接异常
      */
-    protected static void connectHbase() throws HbaseConnectException {
+    static void connectHbase() throws HbaseConnectException {
         if (ip == null){
             throw new HbaseConnectException("IP cannot be null...");
         }
@@ -102,16 +104,16 @@ class HbaseGo {
 
         // Hbase Connection 自管理连接线程
         new Thread(() -> {
-            while (true){
+            while (!stopSelfManagerFlag) {
                 try {                                                           // 本 try 的目的是为了保证线程不会因未知错误中断
                     int length = busyConnectionsTimes.size();
-                    for(int i = 0; i < length; i++){
-                        if(busyConnectionsTimes.get(i).value >= hbaseConnectionOutTime){
+                    for (int i = 0; i < length; i++) {
+                        if (busyConnectionsTimes.get(i).value >= hbaseConnectionOutTime) {
                             flybackConnection(busyConnectionsList.get(i));      // 停滞时间达到上限自回收
                             i--;                                                // 必须使 i - 1
                             length--;                                           // 必须使 length - 1
                             System.out.println("====> Auto recycle a out-time Hbase connection.");
-                        }else {
+                        } else {
                             busyConnectionsTimes.get(i).value++;                // 停滞时间未达到上限，使其停滞时间增加
                         }
                     }
@@ -133,9 +135,9 @@ class HbaseGo {
  * @author Thonnn 2017-11-26
  */
 class HbaseGoTable{
-    protected String tableNmae;                                  // 表名称
+    String tableNmae;                                  // 表名称
     protected String rowkey = "RowKey";                                 // RowKey 映射及其默认值
-    protected HashMap<String, String> familyMap = new HashMap<>();      // 列簇与 bean 中的字段映射存储
+    HashMap<String, String> familyMap = new HashMap<>();      // 列簇与 bean 中的字段映射存储
     HbaseGoTable(String tableNmae){                                        // 默认构造，需要用表名创建
         this.tableNmae = tableNmae;
     }
@@ -147,7 +149,7 @@ class HbaseGoTable{
  * @author Thonnn 2017-11-26
  */
 class MyInt{
-    protected int value = 0;
+    int value = 0;
 
     @Override
     public String toString() {

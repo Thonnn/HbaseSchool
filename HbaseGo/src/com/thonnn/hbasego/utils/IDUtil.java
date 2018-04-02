@@ -8,6 +8,8 @@ import java.util.Random;
 /**
  * IDUtil 工具类用于获得一个ID，或者根据本类中定义的标准ID格式，将ID转化成时间戳
  * @author Thonnn
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public class IDUtil {
 	private static SimpleDateFormat sdf = new SimpleDateFormat ("yyyyMMddHHmmssSSS");
@@ -18,6 +20,7 @@ public class IDUtil {
 	 * @param id 是一个String，长度必须大于17，会自动截取前17位，须服从Format ("yyyyMMddHHmmssSSS")
 	 * @return Long Timestamp
 	 * @throws ParseException String 转 Long Timestamp 错误时发生
+	 * @since 1.0.0
 	 */
 	public static Long getTimestampFromID(String id) throws ParseException{
 		String str = id.length() > 17 ? id.substring(0, 17) : id;
@@ -27,6 +30,7 @@ public class IDUtil {
 	/**
 	 * 获取一个长 21 位的 ID 服从格式 yyyyMMddHHmmssSSS + 4 位随机数
 	 * @return 一个长度为 21 位的 ID
+	 * @since 1.0.0
 	 */
 	public static String getID(){
 		return sdf.format(new Date()) + (((int)((random.nextFloat()+1)*10000)+"").substring(1));

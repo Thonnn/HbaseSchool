@@ -15,6 +15,8 @@ import java.util.*;
 /**
  * HbaseTo 数据表匹配导出工具
  * @author Thonnn 2017-11-26
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public class HbaseToMain {
     public static void main(String[] args) throws Exception {
@@ -25,7 +27,7 @@ public class HbaseToMain {
         System.out.println("---------------------------------------------------------------------------");
         String ip;
         String port;
-        String tables = null;
+        String tables;
         Scanner scan = new Scanner(System.in);
         System.out.print("Please input Hbase IP: ");
         ip = scan.nextLine();
@@ -46,7 +48,7 @@ public class HbaseToMain {
         System.out.println("\tGet "+ tableDescriptors.length +" tables: ");
         for (HTableDescriptor tdescriptor : tableDescriptors){
             String tablename = tdescriptor.getNameAsString();
-            alltableMap.computeIfAbsent(tablename, k -> new ArrayList<String>());
+            alltableMap.computeIfAbsent(tablename, k -> new ArrayList<>());
             List<String> list = alltableMap.get(tablename);
             for(HColumnDescriptor fdescriptor : tdescriptor.getColumnFamilies()){
                 list.add(fdescriptor.getNameAsString());
@@ -57,7 +59,7 @@ public class HbaseToMain {
         tables = scan.nextLine();
         HashMap<String, List<String>> mytableMap;
         if (!tables.trim().equals("*")){
-            mytableMap = new HashMap<String, List<String>>();
+            mytableMap = new HashMap<>();
             for(String table : tables.split(",")){
                 if (alltableMap.get(table.trim()) != null){
                     mytableMap.put(table.trim(), alltableMap.get(table.trim()));

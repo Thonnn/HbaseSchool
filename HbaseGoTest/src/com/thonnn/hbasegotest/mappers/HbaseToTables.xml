@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<HbaseGo>
+    <table name="cjdx" bean="com.thonnn.hbasegotest.beans.CjdxBean">
+        <rowkey field="RowKey" />
+        <family name="classes" field="classes" />
+        <family name="students" field="students" />
+    </table>
+    <table name="test1" bean="com.thonnn.hbasegotest.beans.Test1Bean">
+        <rowkey field="RowKey" />
+        <family name="name" field="name" />
+        <family name="other" field="other" />
+        <family name="sex" field="sex" />
+    </table>
+</HbaseGo>

@@ -5,5 +5,7 @@
  * HbaseGoToTableDao.java 实现了对Hbase的一切操作。<br>
  *
  * @author Thonnn 2017-11-26
+ * @version 1.1.0
+ * @since 1.0.0
  */
 package com.thonnn.hbasego.dao;

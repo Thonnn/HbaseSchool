@@ -5,12 +5,15 @@ import java.io.*;
 /**
  * 字节组转换工具
  * @author Thonnn 2017-11-26
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public class BytesUtil {
     /**
      * 对象转字节组，必须是可序列化的对象
      * @param obj 欲转换的对象
      * @return 转换结果字节组
+     * @since 1.0.0
      */
     public synchronized byte[] toBytes(Object obj){
         byte[] bytes = null;
@@ -33,6 +36,7 @@ public class BytesUtil {
      * 字节组转对象，必须是可反序列化的
      * @param bytes 欲转换的字节组
      * @return 转换结果
+     * @since 1.0.0
      */
     public synchronized Object toObject(byte[] bytes){
         Object obj = null;

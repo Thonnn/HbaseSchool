@@ -23,8 +23,9 @@ import java.util.Objects;
  * HbaseGo的工厂（创建者）类，这个类是单实例的，且强线程安全性的，本类中需要用到大量的配置型参数，因此本类必须在用户使用本框架的任何内容之前进行初始化；
  * 强制地，IP 是必须配置的，build() 方法必须执行且最后执行；
  * 只能使用 getInstance(Class currentClass) 方法进行初始化。
- *
  * @author Thonnn 2017-11-26
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public final class HbaseGoBuilder {
     private static HbaseGoBuilder hbaseGoBuilder = null;        // 保证单实例使用
@@ -40,6 +41,7 @@ public final class HbaseGoBuilder {
      * @param currentClass 执行本方法的类，主要用于反射和 xml 解析
      * @return      一个工厂实例
      * @throws CurrentClassResetException   由于需要强线程安全性，当多个线程同时操作如果重置了 currentClass 则会出现该异常
+     * @since 1.0.0
      */
     public synchronized static HbaseGoBuilder getInstance(Class currentClass) throws CurrentClassResetException {
         if(hbaseGoBuilder == null){
@@ -58,6 +60,7 @@ public final class HbaseGoBuilder {
      * @param ip Hbase 主机 IP
      * @return  当前工厂对象原路带回
      * @throws HbaseGoBuilderException  由于是强线程安全的，当工厂已经执行过 build() 方法之后则不再支持更改，如果尝试更改了，则会抛出该异常，同样的， IP 不能为 null
+     * @since 1.0.0
      */
     public synchronized HbaseGoBuilder setIP(String ip) throws HbaseGoBuilderException {
         if(built){
@@ -75,6 +78,7 @@ public final class HbaseGoBuilder {
      * @param port  端口号
      * @return  当前工厂对象原路带回
      * @throws HbaseGoBuilderException 当端口在工厂执行了 build() 方案后尝试重置时发生，当端口不符合端口标准时发生
+     * @since 1.0.0
      */
     public synchronized HbaseGoBuilder setPort(int port) throws HbaseGoBuilderException {
         if(built){
@@ -92,6 +96,7 @@ public final class HbaseGoBuilder {
      * @param num   连接数
      * @return  当前工厂对象原路带回
      * @throws HbaseGoBuilderException  当端口在工厂执行了 build() 方案后尝试重置时发生，当数量小于 1 时发生
+     * @since 1.0.0
      */
     public synchronized HbaseGoBuilder setMaxHbaseConnections(int num) throws HbaseGoBuilderException {
         if(built){
@@ -109,6 +114,7 @@ public final class HbaseGoBuilder {
      * @param num 连接数
      * @return 当前工厂对象原路带回
      * @throws HbaseGoBuilderException 当端口在工厂执行了 build() 方案后尝试重置时发生，当连接数小于 1 或者大于最大连接数时发生
+     * @since 1.0.0
      */
     public synchronized HbaseGoBuilder setInitHbaseConnections(int num) throws HbaseGoBuilderException {
         if(built){
@@ -129,6 +135,7 @@ public final class HbaseGoBuilder {
      * @param seconds 时间，秒
      * @return  当前工厂对象原路带回
      * @throws HbaseGoBuilderException  当端口在工厂执行了 build() 方案后尝试重置时发生，配置时间小于 60 时发生
+     * @since 1.0.0
      */
     public synchronized HbaseGoBuilder setHbaseConnectionOutTime(int seconds) throws HbaseGoBuilderException {
         if(built){
@@ -145,6 +152,7 @@ public final class HbaseGoBuilder {
      * 添加准备扫描的 xml 所在的包
      * @param packageName   包名
      * @return  当前工厂对象原路带回
+     * @since 1.0.0
      */
     public synchronized HbaseGoBuilder addScanPackage(String packageName){
         String packagePath = packageName.replace(".", "/");
@@ -169,6 +177,7 @@ public final class HbaseGoBuilder {
      * 添加准备扫描的 xml 文件路径，此路径服从 “包名.类名” 的格式，如： com.thonnn.hbasego.mappers.templete.xml
      * @param xmlDotPath    路径，服从 “包名.类名” 的格式，如： com.thonnn.hbasego.mappers.templete.xml
      * @return 当前工厂对象原路带回
+     * @since 1.0.0
      */
     public synchronized HbaseGoBuilder addScanXml(String xmlDotPath){
         if (xmlDotPath.toUpperCase().endsWith(".XML")){
@@ -193,6 +202,7 @@ public final class HbaseGoBuilder {
     /**
      * 执行初始化的最后一步 —— 创建（初始化） HbaseGo
      * @throws HbaseGoRebuildException 当尝试重新创建时发生
+     * @since 1.0.0
      */
     public synchronized void build() throws HbaseGoRebuildException{
         if(!built){

@@ -9,6 +9,8 @@ import java.lang.reflect.Field;
  * 接口中的 default 实现，需要 jdk/jre 1.8 以上版本支持。
  *
  * @author Thonnn 2017-11-26
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public interface IHbaseGoBean {
     BytesUtil bytesUtil = new BytesUtil();
@@ -17,6 +19,7 @@ public interface IHbaseGoBean {
      * 深度克隆方法。
      * @param <T> 泛型上界为 IHbaseGoBean，其表示必须是实现了IHbaseGoBean 接口的类！
      * @return 深度克隆结果，强制类型转换结果为 T 类型
+     * @since 1.1.0
      */
     @SuppressWarnings("unchecked")
     default <T extends IHbaseGoBean> T cloneThis(){
