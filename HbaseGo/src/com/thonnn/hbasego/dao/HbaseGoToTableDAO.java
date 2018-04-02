@@ -23,7 +23,6 @@ import java.util.*;
  * HbaseGo 对 Hbase 操作的基类，实现了IHbaseGoAdd, IHbaseGoSearch, IHbaseGoAlter, IHbaseGoDelete 四个接口；
  *
  * @author Thonnn 2017-11-26
- * @author Thonnn 2018-04-02
  * @version 1.1.0
  * @since 1.0.0
  */
@@ -242,7 +241,8 @@ public class HbaseGoToTableDAO implements IHbaseGoAdd, IHbaseGoSearch, IHbaseGoA
      * @param bean 相当于存储了搜索条件的 bean
      * @param page_size 分页大小
      * @param page_index 分页当前页
-     * @param maxVersion 设定查询的版本数量，注意，如果数据库中有三个版本从老到新为1，2，3，当指定检索两个版本时，返回的是第2，3 两个版本的数据
+     * @param maxVersion 设定查询的版本数量，注意，如果数据库中有三个版本从老到新为1，2，3，当指定检索两个版本时，返回的是第2，3 两个版本的数据；
+     *                   其取值必须大于等于-1，特殊的，当取值为“-1”时表示查询 Hbase 存储的所有版本
      * @param <T> 泛型上界为 IHbaseGoBean，其表示必须是实现了IHbaseGoBean 接口的类！
      * @return 一个存储了搜索结果的 List，其内部是 HbaseGoVersionBean 类型的，正常来说这个值不会是 null 的，当搜索不到数据时一般会返回一个大小为 0 的 List
      * @since 1.1.0
@@ -331,7 +331,8 @@ public class HbaseGoToTableDAO implements IHbaseGoAdd, IHbaseGoSearch, IHbaseGoA
 
     /**
      * 设置检索的最大版本，此方法是由 IDEA 的代码自动简化工具自动生成的。
-     * @param maxVersion 最大版本号
+     * @param maxVersion 最大版本号；
+     *                   其取值必须大于等于-1，特殊的，当取值为“-1”时表示查询 Hbase 存储的所有版本
      * @param scan 扫描器
      * @throws HbaseGoVersionsException 设定版本异常
      * @since 1.1.0
@@ -445,7 +446,8 @@ public class HbaseGoToTableDAO implements IHbaseGoAdd, IHbaseGoSearch, IHbaseGoA
      * @param maxRowKey RowKey 搜索上限
      * @param page_size 分页大小
      * @param page_index 分页当前页
-     * @param maxVersion 设定查询的版本数量，注意，如果数据库中有三个版本从老到新为1，2，3，当指定检索两个版本时，返回的是第2，3 两个版本的数据
+     * @param maxVersion 设定查询的版本数量，注意，如果数据库中有三个版本从老到新为1，2，3，当指定检索两个版本时，返回的是第2，3 两个版本的数据；
+     *                   其取值必须大于等于-1，特殊的，当取值为“-1”时表示查询 Hbase 存储的所有版本
      * @param <T> 泛型参数，上界为IHbaseGoBean
      * @return 一个存储了搜索结果的 List，其内部是 HbaseGoVersionBean 类型的，正常来说这个值不会是 null 的，当搜索不到数据时一般会返回一个大小为 0 的 List
      * @since 1.1.0
