@@ -5,10 +5,10 @@
         <family name="classes" field="classes" />
         <family name="students" field="students" />
     </table>
-    <table name="test1" bean="com.thonnn.hbasegotest.beans.Test1Bean">
+    <table name="test" bean="com.thonnn.hbasegotest.beans.TestBean">
         <rowkey field="RowKey" />
-        <family name="name" field="name" />
+        <family name="basic_msg" field="basic_msg" />
+        <family name="feature_data" field="feature_data" />
         <family name="other" field="other" />
-        <family name="sex" field="sex" />
     </table>
 </HbaseGo>

@@ -3,22 +3,10 @@ package com.thonnn.hbasegotest;
 import com.thonnn.hbasego.assists.HbaseGoVersionBean;
 import com.thonnn.hbasego.dao.HbaseGoBuilder;
 import com.thonnn.hbasego.dao.HbaseGoToTableDAO;
-import com.thonnn.hbasego.interfaces.IHbaseGoBean;
 import com.thonnn.hbasego.utils.IDUtil;
 import com.thonnn.hbasegotest.beans.CjdxBean;
-import com.thonnn.hbasegotest.beans.Test1Bean;
-import com.thonnn.hbasegotest.beans.Test2Bean;
-import com.thonnn.hbasegotest.beans.TestBean;
 
-import javax.naming.Context;
-import java.io.File;
-import java.io.IOException;
-import java.net.JarURLConnection;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.*;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
+import java.util.List;
 
 public class HbaseGoTestMain {
     public static void main(String[] args) throws Exception {
@@ -26,6 +14,7 @@ public class HbaseGoTestMain {
         HbaseGoBuilder hbaseGoBuilder = HbaseGoBuilder.getInstance(HbaseGoTestMain.class).addScanPackage(packageName).setIP("master1");
         hbaseGoBuilder.build();
         HbaseGoToTableDAO dao = new HbaseGoToTableDAO();
+        IDUtil.setTailLength(5);
         //------------------------Test 1--------------------------------------------------------------------------------
         System.out.println();
         CjdxBean cjdxBean_1 = new CjdxBean();
@@ -95,6 +84,7 @@ public class HbaseGoTestMain {
         System.out.println("**********************************************");
         System.out.println("---> firstTimestamp = "+rsl.get(0).getTimestampByBean(rsl.get(0).getFirstVersionBean()));
         System.out.println("---> lastTimestamp  = " + rsl.get(0).getTimestampByBean(rsl.get(0).getLastVersionBean()));
+
         System.exit(0);
     }
 }

@@ -23,7 +23,7 @@ import java.util.*;
  * HbaseGo 对 Hbase 操作的基类，实现了IHbaseGoAdd, IHbaseGoSearch, IHbaseGoAlter, IHbaseGoDelete 四个接口；
  *
  * @author Thonnn 2017-11-26
- * @version 1.1.0
+ * @version 1.1.1
  * @since 1.0.0
  */
 public class HbaseGoToTableDAO implements IHbaseGoAdd, IHbaseGoSearch, IHbaseGoAlter, IHbaseGoDelete {
@@ -178,6 +178,9 @@ public class HbaseGoToTableDAO implements IHbaseGoAdd, IHbaseGoSearch, IHbaseGoA
             if (RowKey != null){                                                    // 检查 rowkey，不为空则按照 rowkey 查询
                 Get get = new Get(bytesUtil.toBytes(RowKey));
                 Result r = table.get(get);
+                if (r.isEmpty()){
+                    return rsl;
+                }
                 T currentBean = bean.cloneThis();        // 自定义的深度克隆方法，克隆一个bean
                 for (String familyKey : familyKeySet){
                     Field familyField = currentBean.getClass().getDeclaredField(hbaseGoTable.familyMap.get(familyKey));
@@ -273,6 +276,9 @@ public class HbaseGoToTableDAO implements IHbaseGoAdd, IHbaseGoSearch, IHbaseGoA
                 }else throw new HbaseGoVersionsException();
 
                 Result r = table.get(get);
+                if (r.isEmpty()){
+                    return rsl;
+                }
                 List<Cell> cells = r.listCells();
                 HashMap<Long, List<Cell>> cellMap = new HashMap<>();
                 assembleCells(cells, cellMap);
@@ -565,6 +571,9 @@ public class HbaseGoToTableDAO implements IHbaseGoAdd, IHbaseGoSearch, IHbaseGoA
             if (RowKey != null){
                 Get get = new Get(bytesUtil.toBytes(RowKey));
                 Result r = table.get(get);
+                if (r.isEmpty()){
+                    return rsl;
+                }
                 for (String familyKey : familyKeySet){
                     Field familyField = bean.getClass().getDeclaredField(hbaseGoTable.familyMap.get(familyKey));
                     familyField.setAccessible(true);
