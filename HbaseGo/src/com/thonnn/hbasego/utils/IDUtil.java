@@ -1,6 +1,6 @@
 package com.thonnn.hbasego.utils;
 
-import com.thonnn.hbasego.exceptions.HbaseGoIDTailLengthException;
+import com.thonnn.hbasego.exceptions.HbaseGoUtilException;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -51,8 +51,8 @@ public class IDUtil {
 	public static void setTailLength(int tailLength){
 		if(tailLength <4 || tailLength > 10){
 			try {
-				throw new HbaseGoIDTailLengthException();
-			} catch (HbaseGoIDTailLengthException e) {
+				throw new HbaseGoUtilException("IDUtil: TailLength must in the range of [4, 10].");
+			} catch (HbaseGoUtilException e) {
 				e.printStackTrace();
 				return;
 			}

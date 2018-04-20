@@ -1,6 +1,10 @@
-package com.thonnn.hbasego.dao;
+package com.thonnn.hbasego;
 
 import com.thonnn.hbasego.exceptions.*;
+import com.thonnn.hbasego.logger.HbaseGoLogType;
+import com.thonnn.hbasego.logger.HbaseGoLoggerProxy;
+import com.thonnn.hbasego.soul.HbaseGoSoulState;
+import com.thonnn.hbasego.soul.HbaseGoStatusCollector;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -20,11 +24,11 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * HbaseGo的工厂（创建者）类，这个类是单实例的，且强线程安全性的，本类中需要用到大量的配置型参数，因此本类必须在用户使用本框架的任何内容之前进行初始化；
- * 强制地，IP 是必须配置的，build() 方法必须执行且最后执行；
+ * HbaseGo的创建者类，这个类是单实例的，且强线程安全性的，本类中需要用到大量的配置型参数，因此本类必须在用户使用本框架的任何内容之前进行初始化；<br>
+ * 强制地，IP 必须配置，build() 方法必须执行且最后执行；<br>
  * 只能使用 getInstance(Class currentClass) 方法进行初始化。
  * @author Thonnn 2017-11-26
- * @version 1.0.0
+ * @version 1.2.0 增加了对日志记录器和状态收集器的汇报。
  * @since 1.0.0
  */
 public final class HbaseGoBuilder {
@@ -40,17 +44,18 @@ public final class HbaseGoBuilder {
      * 获取一个工厂实例，使用同步锁保证线程安全
      * @param currentClass 执行本方法的类，主要用于反射和 xml 解析
      * @return      一个工厂实例
-     * @throws CurrentClassResetException   由于需要强线程安全性，当多个线程同时操作如果重置了 currentClass 则会出现该异常
+     * @throws HbaseGoBuilderException   由于需要强线程安全性，当多个线程同时操作如果重置了 currentClass 则会出现该异常
      * @since 1.0.0
      */
-    public synchronized static HbaseGoBuilder getInstance(Class currentClass) throws CurrentClassResetException {
+    public synchronized static HbaseGoBuilder getInstance(Class currentClass) throws HbaseGoBuilderException {
         if(hbaseGoBuilder == null){
+            HbaseGoStatusCollector.setHbaseGoState(HbaseGoSoulState.NOT_BUILD);
             hbaseGoBuilder = new HbaseGoBuilder();
         }
         if(hbaseGoBuilder.loader == null){
             hbaseGoBuilder.loader = currentClass.getClassLoader();
         }else{
-            throw new CurrentClassResetException();
+            throw new HbaseGoBuilderException("Current Class Reset Exception.");
         }
         return hbaseGoBuilder;
     }
@@ -70,6 +75,7 @@ public final class HbaseGoBuilder {
             throw new HbaseGoBuilderException("IP cannot be null.");
         }
         HbaseGo.ip = ip;
+        HbaseGoLoggerProxy.recordMsg(hbaseGoBuilder, HbaseGoLogType.INFO, "HbaseGoBuilder setIP: " + ip);
         return this;
     }
 
@@ -88,6 +94,7 @@ public final class HbaseGoBuilder {
             throw new HbaseGoBuilderException("Port must between 1 to 65535.");
         }
         HbaseGo.port = port+"";
+        HbaseGoLoggerProxy.recordMsg(hbaseGoBuilder, HbaseGoLogType.INFO, "HbaseGoBuilder setPort: " + port);
         return this;
     }
 
@@ -106,6 +113,7 @@ public final class HbaseGoBuilder {
             throw new HbaseGoBuilderException("MaxHbaseConnections must more than 0.");
         }
         HbaseGo.maxHbaseConnectionsNum = num;
+        HbaseGoLoggerProxy.recordMsg(hbaseGoBuilder, HbaseGoLogType.INFO, "HbaseGoBuilder setMaxHbaseConnections: " + num);
         return this;
     }
 
@@ -127,6 +135,7 @@ public final class HbaseGoBuilder {
             throw new HbaseGoBuilderException("InitHbaseConnections must less then MaxHbaseConnections, current MaxHbaseConnections = "+ HbaseGo.maxHbaseConnectionsNum);
         }
         HbaseGo.initHbaseConnectionsNum = num;
+        HbaseGoLoggerProxy.recordMsg(hbaseGoBuilder, HbaseGoLogType.INFO, "HbaseGoBuilder setInitHbaseConnections: " + num);
         return this;
     }
 
@@ -145,6 +154,7 @@ public final class HbaseGoBuilder {
             throw new HbaseGoBuilderException("Seconds cannot be less than 60.");
         }
         HbaseGo.hbaseConnectionOutTime = seconds;
+        HbaseGoLoggerProxy.recordMsg(hbaseGoBuilder, HbaseGoLogType.INFO, "HbaseGoBuilder setHbaseConnectionOutTime: " + seconds);
         return this;
     }
 
@@ -170,6 +180,7 @@ public final class HbaseGoBuilder {
                 }
             }
         }
+        HbaseGoLoggerProxy.recordMsg(hbaseGoBuilder, HbaseGoLogType.INFO, "HbaseGoBuilder addScanPackage: " + packageName);
         return this;
     }
 
@@ -196,17 +207,18 @@ public final class HbaseGoBuilder {
                 }
             }
         }
+        HbaseGoLoggerProxy.recordMsg(hbaseGoBuilder, HbaseGoLogType.INFO, "HbaseGoBuilder addScanXml: " + xmlDotPath);
         return this;
     }
 
     /**
      * 执行初始化的最后一步 —— 创建（初始化） HbaseGo
-     * @throws HbaseGoRebuildException 当尝试重新创建时发生
+     * @throws HbaseGoBuilderException 当尝试重新创建时发生
      * @since 1.0.0
      */
-    public synchronized void build() throws HbaseGoRebuildException{
+    public synchronized void build() throws HbaseGoBuilderException{
         if(!built){
-            HashMap<String, HbaseGoTable> tableBeanHashMap = new HashMap<>();
+            HashMap<String, HbaseGoTableMapper> tableBeanHashMap = HbaseGo.tableBeanHashMap;
             try {
                 DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
                 DocumentBuilder db = dbf.newDocumentBuilder();
@@ -223,78 +235,79 @@ public final class HbaseGoBuilder {
                         document = db.parse(xmlFile);
                         Element dom = document.getDocumentElement();
                         if (!dom.getTagName().equals("HbaseGo")){
-                            throw new HbaseGoXMLAnalysisException("XML format error in the file of "+ xmlFile.getPath());
+                            throw new HbaseGoBuilderException("XML format error in the file of "+ xmlFile.getPath());
                         }
                         NodeList tables = dom.getElementsByTagName("table");
                         if (tables == null || tables.getLength() <= 0){
-                            throw new HbaseGoXMLAnalysisException("Element of '<table />' is necessary in file : "+ xmlFile.getPath());
+                            throw new HbaseGoBuilderException("Element of '<table />' is necessary in file : "+ xmlFile.getPath());
                         }
                         for (int i = 0; i < tables.getLength(); i++){
                             try{
                                 Node item = tables.item(i);
                                 Node tableNode = item.getAttributes().getNamedItem("name");
                                 if(tableNode == null || tableNode.getNodeValue().equals("")){
-                                    throw new HbaseGoXMLAnalysisException("Attributes of 'name' in the " + i + "st element of '<table />' is necessary in file : "+ xmlFile.getPath());
+                                    throw new HbaseGoBuilderException("Attributes of 'name' in the " + i + "st element of '<table />' is necessary in file : "+ xmlFile.getPath());
                                 }
                                 Node beanNode = item.getAttributes().getNamedItem("bean");
                                 if (beanNode == null || beanNode.getNodeValue().equals("")){
-                                    throw new HbaseGoXMLAnalysisException("Attributes of 'bean' in the " + i + "st element of '<table />' is necessary in file : "+ xmlFile.getPath());
+                                    throw new HbaseGoBuilderException("Attributes of 'bean' in the " + i + "st element of '<table />' is necessary in file : "+ xmlFile.getPath());
                                 }
-                                HbaseGoTable hbaseGoTable = new HbaseGoTable(tableNode.getNodeValue());
+                                HbaseGoTableMapper hbaseGoTableMapper = new HbaseGoTableMapper(tableNode.getNodeValue());
                                 NodeList rowkeys = ((Element)item).getElementsByTagName("rowkey");
                                 if(rowkeys != null && rowkeys.getLength() > 0){
                                     Node field = rowkeys.item(rowkeys.getLength()-1).getAttributes().getNamedItem("field");
                                     if(field != null){
-                                        hbaseGoTable.rowkey = field.getNodeValue();
+                                        hbaseGoTableMapper.rowkey = field.getNodeValue();
                                     }
                                 }
                                 NodeList families = ((Element)item).getElementsByTagName("family");
                                 if(families == null || families.getLength() <= 0){
-                                    throw new HbaseGoXMLAnalysisException("Cannot find any HbaseGo family settings in table : " + item.getAttributes().getNamedItem("name") + " in file : "+ xmlFile.getPath());
+                                    throw new HbaseGoBuilderException("Cannot find any HbaseGo family settings in table : " + item.getAttributes().getNamedItem("name") + " in file : "+ xmlFile.getPath());
                                 }
                                 for (int j = 0; j < families.getLength(); j++) {
                                     try{
                                         Node settingItem = families.item(j);
                                         Node nameItem = settingItem.getAttributes().getNamedItem("name");
                                         if(nameItem == null || nameItem.getNodeValue().equals("")){
-                                            throw new HbaseGoXMLAnalysisException("Attributes of 'name' in the " + j + "st element of '<family />' in table : "+ item.getAttributes().getNamedItem("name") +" is necessary in file : "+ xmlFile.getPath());
+                                            throw new HbaseGoBuilderException("Attributes of 'name' in the " + j + "st element of '<family />' in table : "+ item.getAttributes().getNamedItem("name") +" is necessary in file : "+ xmlFile.getPath());
                                         }
                                         Node fieldItem = settingItem.getAttributes().getNamedItem("field");
                                         if(fieldItem == null || fieldItem.getNodeValue().equals("")){
-                                            throw new HbaseGoXMLAnalysisException("Attributes of 'field' in the "+ j +"st element of '<family />'  in table : "+ item.getAttributes().getNamedItem("name") +" is necessary in file : "+ xmlFile.getPath());
+                                            throw new HbaseGoBuilderException("Attributes of 'field' in the "+ j +"st element of '<family />'  in table : "+ item.getAttributes().getNamedItem("name") +" is necessary in file : "+ xmlFile.getPath());
                                         }
-                                        if (hbaseGoTable.familyMap.containsKey(nameItem.getNodeValue())){
-                                            throw new HbaseGoXMLAnalysisException("It's already exists a same name family of '"+ nameItem.getNodeValue() +"' in file : "+ xmlFile.getPath());
+                                        if (hbaseGoTableMapper.familyMap.containsKey(nameItem.getNodeValue())){
+                                            throw new HbaseGoBuilderException("It's already exists an identical name family of '"+ nameItem.getNodeValue() +"' in file : "+ xmlFile.getPath());
                                         }
-                                        hbaseGoTable.familyMap.put(nameItem.getNodeValue(), fieldItem.getNodeValue());
-                                    }catch (HbaseGoXMLAnalysisException e){
+                                        hbaseGoTableMapper.familyMap.put(nameItem.getNodeValue(), fieldItem.getNodeValue());
+                                    }catch (HbaseGoBuilderException e){
                                         e.printStackTrace();
                                     }
                                 }
-                                if(tableBeanHashMap.containsKey(hbaseGoTable.tableNmae)){
-                                    throw new HbaseGoXMLAnalysisException("It's already exists a same name table of '"+ hbaseGoTable.tableNmae +"' in file : "+ xmlFile.getPath());
+                                if(tableBeanHashMap.containsKey(hbaseGoTableMapper.tableNmae)){
+                                    throw new HbaseGoBuilderException("It's already exists an identical name table of '"+ hbaseGoTableMapper.tableNmae +"' in file : "+ xmlFile.getPath());
                                 }
-                                tableBeanHashMap.put(beanNode.getNodeValue(), hbaseGoTable);
-                            }catch (HbaseGoXMLAnalysisException e){
+                                tableBeanHashMap.put(beanNode.getNodeValue(), hbaseGoTableMapper);
+                            }catch (HbaseGoBuilderException e){
                                 e.printStackTrace();
                             }
                         }
-                    }catch (SAXException|IOException|HbaseGoXMLAnalysisException e){
+                    }catch (SAXException|IOException|HbaseGoBuilderException e){
                         e.printStackTrace();
                     }
                 }
             } catch (ParserConfigurationException e) {
                 e.printStackTrace();
             }
-            HbaseGo.tableBeanHashMap = tableBeanHashMap;
             try {
                 HbaseGo.connectHbase();
-            } catch (HbaseConnectException e) {
+            } catch (HbaseGoSelfException e) {
                 e.printStackTrace();
             }
             built = true;
+            HbaseGoStatusCollector.setHbaseGoState(HbaseGoSoulState.BUILT);
+            HbaseGoLoggerProxy.recordMsg(hbaseGoBuilder, HbaseGoLogType.INFO, "HbaseGoBuilder built successfully.");
             return;
         }
-        throw new HbaseGoRebuildException();
+        throw new HbaseGoBuilderException("HbaseGo re-build exception.");
     }
 }

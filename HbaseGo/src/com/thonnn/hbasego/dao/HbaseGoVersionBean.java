@@ -1,6 +1,6 @@
-package com.thonnn.hbasego.assists;
+package com.thonnn.hbasego.dao;
 
-import com.thonnn.hbasego.exceptions.HbaseGoVersionsException;
+import com.thonnn.hbasego.exceptions.HBaseGoDAOException;
 import com.thonnn.hbasego.interfaces.IHbaseGoBean;
 
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ import java.util.List;
  * @version 1.1.0
  * @since 1.1.0
  */
-public class HbaseGoVersionBean<T extends IHbaseGoBean>{
+public final class HbaseGoVersionBean<T extends IHbaseGoBean>{
     private List<Time_Bean> list = new ArrayList<>();
 
     /**
@@ -23,7 +23,7 @@ public class HbaseGoVersionBean<T extends IHbaseGoBean>{
      * @param bean 实现了接口 IHbaseGoBean 的实例
      * @since 1.1.0
      */
-    public void add(long timestamp, T bean){
+    void add(long timestamp, T bean){
         //先添加，后重新排序
         list.add(new Time_Bean(timestamp, bean));
         list.sort(Comparator.comparingLong(tb -> tb.timestamp));            // 从老版本到新版本的排序（堆叠）方案，确使0位置为最老版本
@@ -78,8 +78,8 @@ public class HbaseGoVersionBean<T extends IHbaseGoBean>{
     public T getBeanByVersion(int version){
         if(version <= 0){
             try {
-                throw new HbaseGoVersionsException("HbaseGo: Data VERSION mast be more than 0.");
-            } catch (HbaseGoVersionsException e) {
+                throw new HBaseGoDAOException("HbaseGo: Data VERSION mast be more than 0.");
+            } catch (HBaseGoDAOException e) {
                 e.printStackTrace();
             }
         }

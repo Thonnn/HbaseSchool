@@ -9,8 +9,8 @@ import com.thonnn.hbasego.logger.HbaseGoLoggerProxy;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class HbaseGoBuilderException extends HbaseGoSuperException {
-    public HbaseGoBuilderException(String msg){
+public class HBaseGoDAOException extends HbaseGoSuperException {
+    public HBaseGoDAOException(String msg){
         super(msg);
     }
 }

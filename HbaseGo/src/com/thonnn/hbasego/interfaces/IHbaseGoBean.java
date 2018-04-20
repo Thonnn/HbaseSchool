@@ -2,8 +2,6 @@ package com.thonnn.hbasego.interfaces;
 
 import com.thonnn.hbasego.utils.BytesUtil;
 
-import java.lang.reflect.Field;
-
 /**
  * 可识别的 bean 的必要接口，所有 bean 必须实现的；
  * 接口中的 default 实现，需要 jdk/jre 1.8 以上版本支持。
