@@ -1,4 +1,6 @@
 # HbaseSchool 适配 Hbase 1.2.5 版本
+· 发布版本中 vX.X.X (例如 v1.2.0) 适配该分支。
+
 这是一个Hbase的Java操作框架，它能够实现Java对Hbase操作的快速实现，它由 HbaseTo 和 HbaseGo 两部分组成，其中  
 - HbaseTo是一个工具，它可以导出一些 “*Bean.java” 文件和 "HbaseToTables.xml" 文件，这些文件是为了 HbaseGo 服务的。
 - HbaseGo是一个 Java 的实现了 Hbase 数据增、删、改、查的开发框架，你只需要使用 HbaseTo 进行数据导出生成，然后将文件拷贝到你的工程之后稍作调整，再将HbaseGo架包导入工程就可以使用了。
@@ -24,7 +26,9 @@
 
 =====================================================================
 
-# HbaseSchool
+# HbaseSchool adapt Hbase 1.2.5
+· Release version vX.X.X (eg. v1.2.0) adapt this branch.
+
 HbaseSchool is a develop tool for Hbase. It can help developers to develop Java programs about Hbase quickly. It consists 2 parts of HbaseTo and HbaseGo : 
 - HbaseTo is a tool which can export many "*Bean.java" files and "HbaseToTables.xml" file for HbaseGo's work.
 - HbaseGo is a tool which can operate data for hbase, for example, it can add, delete, alter, search data for hbase. You need to use HbaseTo to export many files and copy them to your project and import HbaseGo to it for you work.  
