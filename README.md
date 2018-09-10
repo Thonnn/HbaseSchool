@@ -28,8 +28,8 @@
 =====================================================================
 
 # HbaseSchool
-· Release version vX.X.X (eg. v1.2.0) adapt the branch of Hbase-1.2.5.  
-· Release version wX.X.X (eg. w1.2.0) adapt the branch of Hbase-2.0.1.
+· Release version vX.X.X (eg. v1.2.0) adapted to the branch of Hbase-1.2.5.  
+· Release version wX.X.X (eg. w1.2.0) adapted to the branch of Hbase-2.0.1.
 
 HbaseSchool is a develop tool for Hbase. It can help developers to develop Java programs about Hbase quickly. It consists 2 parts of HbaseTo and HbaseGo : 
 - HbaseTo is a tool which can export many "*Bean.java" files and "HbaseToTables.xml" file for HbaseGo's work.
