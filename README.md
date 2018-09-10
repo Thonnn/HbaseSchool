@@ -1,5 +1,5 @@
 # HbaseSchool
-· 发布版本中 vX.X.X (例如 v1.2.0) 适配 Hbase-1.2.5 分支
+· 发布版本中 vX.X.X (例如 v1.2.0) 适配 Hbase-1.2.5 分支  
 · 发布版本中 wX.X.X (例如 w1.2.0) 适配 Hbase-2.0.1 分支
 
 这是一个Hbase的Java操作框架，它能够实现Java对Hbase操作的快速实现，它由 HbaseTo 和 HbaseGo 两部分组成，其中  
